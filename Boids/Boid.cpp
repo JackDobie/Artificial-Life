@@ -39,8 +39,11 @@ void Boid::update(float t, vecBoid* boidList)
 	XMFLOAT3  vAlignment = calculateAlignmentVector(&nearBoids);
 	XMFLOAT3  vCohesion = calculateCohesionVector(&nearBoids);
 
-	// set me
-	//m_position = ;
+	createRandomDirection();
+	XMFLOAT3 dir = multiplyFloat3(m_direction, t * 100.0f);
+	m_position = addFloat3(m_position, dir);
+	//m_position = m_position + m_direction * t * 10.0f;
+	m_direction.z = 0;
 	
 
 	DrawableGameObject::update(t);
@@ -209,17 +212,17 @@ void Boid::checkIsOnScreenAndFix(const XMMATRIX&  view, const XMMATRIX&  proj)
 	}
 
 	// method 1 - appear on the other side
-	//m_position.x = v4.x;
-	//m_position.y = v4.y;
-	//m_position.z = v4.z;
+	m_position.x = v4.x;
+	m_position.y = v4.y;
+	m_position.z = v4.z;
 
 
 	// method2 - bounce off sides and head to centre
-	if (v.x < -1 || v.x > 1 || v.y < -1 || v.y > 1)
-	{
-		m_direction = multiplyFloat3(m_direction, -1);;
-		m_direction = normaliseFloat3(m_direction);
-	}
+	//if (v.x < -1 || v.x > 1 || v.y < -1 || v.y > 1)
+	//{
+	//	m_direction = multiplyFloat3(m_direction, -1);
+	//	m_direction = normaliseFloat3(m_direction);
+	//}
 
 	return;
 }
