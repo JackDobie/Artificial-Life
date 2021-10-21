@@ -39,10 +39,12 @@ void Boid::update(float t, vecBoid* boidList)
 	XMFLOAT3  vAlignment = calculateAlignmentVector(&nearBoids);
 	XMFLOAT3  vCohesion = calculateCohesionVector(&nearBoids);
 
-	createRandomDirection();
-	XMFLOAT3 dir = multiplyFloat3(m_direction, t * 100.0f);
+	//createRandomDirection();
+	m_direction = vSeparation;
+	float speed = 200.0f;
+	XMFLOAT3 dir = multiplyFloat3(m_direction, t * speed);
 	m_position = addFloat3(m_position, dir);
-	//m_position = m_position + m_direction * t * 10.0f;
+	m_position.z = 0;
 	m_direction.z = 0;
 	
 
@@ -58,10 +60,36 @@ XMFLOAT3 Boid::calculateSeparationVector(vecBoid* boidList)
 	// work out which is nearest fish, and calculate a vector away from that
 	Boid* nearest = nullptr;
 	XMFLOAT3 directionNearest;
+	float shortestDistance = FLT_MAX;
 
-	// your code here
+	for (Boid* b : *boidList)
+	{
+		// ignore self
+		if (b == this)
+			continue;
 
-	if (nearest != nullptr) {
+		if (nearest == nullptr)
+		{
+			nearest = b;
+		}
+		else
+		{
+			// calculate the distance to each boid and find the shortest
+			XMFLOAT3 vB = *(b->getPosition());
+			XMFLOAT3 vDiff = subtractFloat3(m_position, vB);
+			float l = magnitudeFloat3(vDiff);
+			if (l < shortestDistance)
+			{
+				shortestDistance = l;
+				nearest = b;
+			}
+		}
+	}
+
+	if (nearest != nullptr) 
+	{
+		// get the direction from nearest boid to current boid
+		directionNearest = subtractFloat3(m_position, *nearest->getPosition());
 		return normaliseFloat3(directionNearest);
 	}
 
@@ -75,7 +103,11 @@ XMFLOAT3 Boid::calculateAlignmentVector(vecBoid* boidList)
 	if (boidList == nullptr)
 		return nearby;
 
-	// your code here
+	for (Boid* b : *boidList)
+	{
+		nearby = addFloat3(*b->getDirection(), nearby);
+	}
+	nearby = divideFloat3(nearby, boidList->size());
 
 	return normaliseFloat3(nearby); // return the normalised (average) direction of nearby drawables
 }
@@ -88,8 +120,11 @@ XMFLOAT3 Boid::calculateCohesionVector(vecBoid* boidList)
 		return nearby;
 
 	// calculate average position of nearby
-	for (Boid* boid : *boidList) {
+	for (Boid* boid : *boidList) 
+	{
+		nearby = addFloat3(*boid->getPosition(), nearby);
 	}
+	nearby = divideFloat3(nearby, boidList->size());
 
 	return normaliseFloat3(nearby); // nearby is the direction to where the other drawables are
 }
