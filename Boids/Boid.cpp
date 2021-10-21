@@ -6,6 +6,7 @@
 Boid::Boid()
 {
 	//m_position = XMFLOAT3(0, 0, 0);
+	createRandomDirection();
 }
 
 Boid::~Boid()
@@ -35,15 +36,28 @@ void Boid::update(float t, vecBoid* boidList)
 	vecBoid nearBoids = nearbyBoids(boidList);
 
 	// NOTE these functions should always return a normalised vector
-	XMFLOAT3  vSeparation = calculateSeparationVector(&nearBoids);
-	XMFLOAT3  vAlignment = calculateAlignmentVector(&nearBoids);
-	XMFLOAT3  vCohesion = calculateCohesionVector(&nearBoids);
+	XMFLOAT3  vSeparation = calculateSeparationVector(&nearBoids); // vector away from nearest boid
+	XMFLOAT3  vAlignment = calculateAlignmentVector(&nearBoids); // average direction of nearby boids
+	XMFLOAT3  vCohesion = calculateCohesionVector(&nearBoids); // vector towards average position of nearby boids
 
-	//createRandomDirection();
-	m_direction = vSeparation;
-	float speed = 200.0f;
+	// multiply each vector by a scale to make some more important than others
+	float separationScale = 1.0f;
+	float alignmentScale = 2.0f;
+	float cohesionScale = 0.75f;
+	vSeparation = multiplyFloat3(vSeparation, separationScale);
+	vAlignment = multiplyFloat3(vAlignment, alignmentScale);
+	vCohesion = multiplyFloat3(vCohesion, cohesionScale);
+
+	// add all three together and normalise
+	m_direction = addFloat3(vSeparation, vAlignment);
+	m_direction = addFloat3(m_direction, vCohesion);
+	m_direction = normaliseFloat3(m_direction);
+
+	float speed = 100.0f;
 	XMFLOAT3 dir = multiplyFloat3(m_direction, t * speed);
 	m_position = addFloat3(m_position, dir);
+
+
 	m_position.z = 0;
 	m_direction.z = 0;
 	
@@ -124,7 +138,9 @@ XMFLOAT3 Boid::calculateCohesionVector(vecBoid* boidList)
 	{
 		nearby = addFloat3(*boid->getPosition(), nearby);
 	}
-	nearby = divideFloat3(nearby, boidList->size());
+	nearby = divideFloat3(nearby, boidList->size()); // this is the avg position
+
+	nearby = subtractFloat3(nearby, m_position); // this gets the direction to the avg position
 
 	return normaliseFloat3(nearby); // nearby is the direction to where the other drawables are
 }
