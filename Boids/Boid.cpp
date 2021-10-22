@@ -1,7 +1,7 @@
 #include "Boid.h"
 
 
-#define NEARBY_DISTANCE		100.0f	// how far boids can see
+#define NEARBY_DISTANCE		200.0f	// how far boids can see
 
 Boid::Boid()
 {
@@ -51,16 +51,15 @@ void Boid::update(float t, vecBoid* boidList)
 	// add all three together and normalise
 	m_direction = addFloat3(vSeparation, vAlignment);
 	m_direction = addFloat3(m_direction, vCohesion);
-	m_direction = normaliseFloat3(m_direction);
+	if(magnitudeFloat3(m_direction) > 0)
+		m_direction = normaliseFloat3(m_direction);
 
 	float speed = 100.0f;
 	XMFLOAT3 dir = multiplyFloat3(m_direction, t * speed);
 	m_position = addFloat3(m_position, dir);
 
-
 	m_position.z = 0;
 	m_direction.z = 0;
-	
 
 	DrawableGameObject::update(t);
 }

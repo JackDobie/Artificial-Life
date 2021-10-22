@@ -27,6 +27,8 @@ DrawableGameObject::DrawableGameObject()
 
 
 	m_position = XMFLOAT3(0, 0, 0);
+
+	m_scale = 1.0f;
 }
 
 
@@ -170,15 +172,22 @@ void DrawableGameObject::setPosition(XMFLOAT3 position)
 	m_position = position;
 }
 
+void DrawableGameObject::setScale(float scale)
+{
+	m_scale = scale;
+}
+
 
 void DrawableGameObject::update(float t)
 {
+	XMMATRIX mScale = XMMatrixScaling(m_scale, m_scale, m_scale);
+
 	// Cube:  Rotate around origin
 	XMMATRIX mSpin = XMMatrixRotationZ(-t);
 	
 	XMMATRIX mTranslate = XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 
-	XMStoreFloat4x4(&m_World, mSpin * mTranslate);
+	XMStoreFloat4x4(&m_World, mScale * mSpin * mTranslate);
 }
 
 
