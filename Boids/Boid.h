@@ -1,7 +1,13 @@
 #pragma once
+
 #include "DrawableGameObject.h"
-class Boid :
-	public DrawableGameObject
+
+// default scales for the forces applied to boids
+#define SEPARATIONSCALE_DEFAULT	1.0f
+#define ALIGNMENTSCALE_DEFAULT	2.0f
+#define COHESIONSCALE_DEFAULT	0.75f
+
+class Boid : public DrawableGameObject
 {
 public:
 	Boid();
@@ -29,5 +35,9 @@ protected:
 
 	XMFLOAT3							m_direction;
 	//unsigned int*						m_nearbyDrawables;
+
+	float								separationScale = SEPARATIONSCALE_DEFAULT;
+	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
+	float								cohesionScale = COHESIONSCALE_DEFAULT;
 };
 

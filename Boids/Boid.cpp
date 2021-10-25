@@ -1,7 +1,6 @@
 #include "Boid.h"
 
-
-#define NEARBY_DISTANCE		200.0f	// how far boids can see
+#define NEARBY_DISTANCE			200.0f	// how far boids can see
 
 Boid::Boid()
 {
@@ -41,9 +40,6 @@ void Boid::update(float t, vecBoid* boidList)
 	XMFLOAT3  vCohesion = calculateCohesionVector(&nearBoids); // vector towards average position of nearby boids
 
 	// multiply each vector by a scale to make some more important than others
-	float separationScale = 1.0f;
-	float alignmentScale = 2.0f;
-	float cohesionScale = 0.75f;
 	vSeparation = multiplyFloat3(vSeparation, separationScale);
 	vAlignment = multiplyFloat3(vAlignment, alignmentScale);
 	vCohesion = multiplyFloat3(vCohesion, cohesionScale);
@@ -53,6 +49,8 @@ void Boid::update(float t, vecBoid* boidList)
 	m_direction = addFloat3(m_direction, vCohesion);
 	if(magnitudeFloat3(m_direction) > 0)
 		m_direction = normaliseFloat3(m_direction);
+	else
+		createRandomDirection(); // if no direction, make one
 
 	float speed = 100.0f;
 	XMFLOAT3 dir = multiplyFloat3(m_direction, t * speed);
