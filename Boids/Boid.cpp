@@ -4,7 +4,7 @@
 
 Boid::Boid()
 {
-	//m_position = XMFLOAT3(0, 0, 0);
+	m_scale = 1.0f;
 	createRandomDirection();
 }
 
@@ -194,9 +194,7 @@ XMFLOAT3 Boid::vecToNearbyBoids(vecBoid* boidList)
 	return normaliseFloat3(m_direction);
 }
 
-
 // use but don't alter the methods below
-
 XMFLOAT3 Boid::addFloat3(XMFLOAT3& f1, XMFLOAT3& f2)
 {
 	XMFLOAT3 out;

@@ -20,6 +20,7 @@
 #include <vector>
 #include <time.h>  
 #include "Boid.h"
+#include "Predator.h"
 
 
 //--------------------------------------------------------------------------------------
@@ -73,6 +74,7 @@ int						g_viewWidth;
 int						g_viewHeight;
 
 vecBoid					g_Boids;
+vector<Predator*>       g_Predators;
 
 
 void placeFish()
@@ -85,8 +87,18 @@ void placeFish()
 		return;
 	fish->setPosition(XMFLOAT3(0, 0, 0));
 	g_Boids.push_back(fish);
+}
 
+void placePredator()
+{
+    HRESULT hr;
 
+    Predator* pred = new Predator();
+    hr = pred->initMesh(g_pd3dDevice, g_pImmediateContext);
+    if (FAILED(hr))
+        return;
+    pred->setPosition(XMFLOAT3(500.0f, 500.0f, 0));
+    g_Predators.push_back(pred);
 }
 
 //--------------------------------------------------------------------------------------
@@ -152,7 +164,7 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
         return E_FAIL;
 
     // Create window
-	int width = 1024;
+	int width = 1280;
 	int height = 768;
     g_hInst = hInstance;
     RECT rc = { 0, 0, width, height };
@@ -503,6 +515,8 @@ HRESULT		InitMesh()
     {
         placeFish();
     }
+
+    placePredator();
     
     // create square
     for (Boid* b : g_Boids)
@@ -554,8 +568,13 @@ void CleanupDevice()
 	{
 		delete g_Boids[i];
 	}
-
 	g_Boids.clear();
+
+    for (unsigned int i = 0; i < g_Predators.size(); i++)
+    {
+        delete g_Predators[i];
+    }
+    g_Predators.clear();
 
     // Remove any bound render target or depth/stencil buffer
     ID3D11RenderTargetView* nullViews[] = { nullptr };
@@ -665,17 +684,29 @@ void setupMaterialConstantBuffer(const unsigned int index)
 	MaterialPropertiesConstantBuffer mcb = g_Boids[index]->getMaterial();
 	g_pImmediateContext->UpdateSubresource(g_pMaterialConstantBuffer, 0, nullptr, &mcb, 0, 0);
 }
+void setupMaterialConstantBufferPredator(const unsigned int index)
+{
+    MaterialPropertiesConstantBuffer mcb = g_Predators[index]->getMaterial();
+    g_pImmediateContext->UpdateSubresource(g_pMaterialConstantBuffer, 0, nullptr, &mcb, 0, 0);
+}
 
 void setupTransformConstantBuffer(const unsigned int index)
 {
-	
 	ConstantBuffer cb1;
 	cb1.mWorld = XMMatrixTranspose(XMLoadFloat4x4(g_Boids[index]->getTransform()));
 	cb1.mView = XMMatrixTranspose(g_View);
 	cb1.mProjection = XMMatrixTranspose(g_Projection);
 	cb1.vOutputColor = XMFLOAT4(0, 0, 0, 0);
 	g_pImmediateContext->UpdateSubresource(g_pConstantBuffer, 0, nullptr, &cb1, 0, 0);
-
+}
+void setupTransformConstantBufferPredator(const unsigned int index)
+{
+    ConstantBuffer cb1;
+    cb1.mWorld = XMMatrixTranspose(XMLoadFloat4x4(g_Predators[index]->getTransform()));
+    cb1.mView = XMMatrixTranspose(g_View);
+    cb1.mProjection = XMMatrixTranspose(g_Projection);
+    cb1.vOutputColor = XMFLOAT4(0, 0, 0, 0);
+    g_pImmediateContext->UpdateSubresource(g_pConstantBuffer, 0, nullptr, &cb1, 0, 0);
 }
 
 //--------------------------------------------------------------------------------------
@@ -736,6 +767,33 @@ void Render()
 		// draw 
 		g_Boids[i]->draw(g_pImmediateContext);
 	}
+
+    for (unsigned int i = 0; i < g_Predators.size(); i++)
+    {
+        g_Predators[i]->Update(t, &g_Boids);
+        XMMATRIX vp = g_View * g_Projection;
+        Boid* dob = (Boid*)g_Predators[i];
+
+        dob->checkIsOnScreenAndFix(g_View, g_Projection);
+
+        setupTransformConstantBufferPredator(i);
+        setupLightingConstantBuffer();
+        setupMaterialConstantBufferPredator(i);
+
+        // Render a cube
+        g_pImmediateContext->VSSetShader(g_pVertexShader, nullptr, 0);
+        g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pConstantBuffer);
+
+        g_pImmediateContext->PSSetShader(g_pPixelShader, nullptr, 0);
+        g_pImmediateContext->PSSetConstantBuffers(1, 1, &g_pMaterialConstantBuffer);
+        g_pImmediateContext->PSSetConstantBuffers(2, 1, &g_pLightConstantBuffer);
+
+        g_pImmediateContext->PSSetShaderResources(0, 1, g_Predators[i]->getTextureResourceView());
+        g_pImmediateContext->PSSetSamplers(0, 1, g_Predators[i]->getTextureSamplerState());
+
+        // draw 
+        g_Predators[i]->draw(g_pImmediateContext);
+    }
 
     // Present our back buffer to our front buffer
     g_pSwapChain->Present( 0, 0 );
