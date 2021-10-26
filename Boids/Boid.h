@@ -3,9 +3,9 @@
 #include "DrawableGameObject.h"
 
 // default scales for the forces applied to boids
-#define SEPARATIONSCALE_DEFAULT	1.0f
+#define SEPARATIONSCALE_DEFAULT	1.1f
 #define ALIGNMENTSCALE_DEFAULT	2.0f
-#define COHESIONSCALE_DEFAULT	0.75f
+#define COHESIONSCALE_DEFAULT	1.0f
 
 class Boid : public DrawableGameObject
 {
@@ -24,6 +24,7 @@ protected:
 	XMFLOAT3							calculateSeparationVector(vecBoid* drawList);
 	XMFLOAT3							calculateAlignmentVector(vecBoid* drawList);
 	XMFLOAT3							calculateCohesionVector(vecBoid* drawList);
+	XMFLOAT3							vecToNearbyBoids(vecBoid* boidList);
 	void								createRandomDirection();
 
 	XMFLOAT3							addFloat3(XMFLOAT3& f1, XMFLOAT3& f2);

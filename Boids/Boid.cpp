@@ -1,6 +1,6 @@
 #include "Boid.h"
 
-#define NEARBY_DISTANCE			200.0f	// how far boids can see
+#define NEARBY_DISTANCE	35.0f // how far boids can see
 
 Boid::Boid()
 {
@@ -47,10 +47,15 @@ void Boid::update(float t, vecBoid* boidList)
 	// add all three together and normalise
 	m_direction = addFloat3(vSeparation, vAlignment);
 	m_direction = addFloat3(m_direction, vCohesion);
-	if(magnitudeFloat3(m_direction) > 0)
+	if (magnitudeFloat3(m_direction) != 0)
+	{
 		m_direction = normaliseFloat3(m_direction);
+	}
 	else
-		createRandomDirection(); // if no direction, make one
+	{
+		//createRandomDirection(); // if no direction, make one
+		m_direction = vecToNearbyBoids(boidList);
+	}
 
 	float speed = 100.0f;
 	XMFLOAT3 dir = multiplyFloat3(m_direction, t * speed);
@@ -142,6 +147,52 @@ XMFLOAT3 Boid::calculateCohesionVector(vecBoid* boidList)
 	return normaliseFloat3(nearby); // nearby is the direction to where the other drawables are
 }
 
+
+XMFLOAT3 Boid::vecToNearbyBoids(vecBoid* boidList)
+{
+	XMFLOAT3 nearby = XMFLOAT3(0, 0, 0);
+	if (boidList == nullptr)
+		return nearby;
+
+	// work out which is nearest fish, and calculate a vector away from that
+	Boid* nearest = nullptr;
+	XMFLOAT3 directionNearest;
+	float shortestDistance = FLT_MAX;
+
+	for (Boid* b : *boidList)
+	{
+		// ignore self
+		if (b == this)
+			continue;
+
+		if (nearest == nullptr)
+		{
+			nearest = b;
+		}
+		else
+		{
+			// calculate the distance to each boid and find the shortest
+			XMFLOAT3 vB = *(b->getPosition());
+			XMFLOAT3 vDiff = subtractFloat3(m_position, vB);
+			float l = magnitudeFloat3(vDiff);
+			if (l < shortestDistance)
+			{
+				shortestDistance = l;
+				nearest = b;
+			}
+		}
+	}
+
+	if (nearest != nullptr)
+	{
+		// get the direction from nearest boid to current boid
+		directionNearest = subtractFloat3(*nearest->getPosition(), m_position);
+		return normaliseFloat3(directionNearest);
+	}
+
+	// if there is not a nearby fish - simply return the current direction. 
+	return normaliseFloat3(m_direction);
+}
 
 
 // use but don't alter the methods below
