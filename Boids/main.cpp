@@ -724,12 +724,12 @@ void Render()
 	timeStart = timeCur;
 
 	float FPS60 = 1.0f / 60.0f;
-	static float cummulativeTime = 0;
+	static float cumulativeTime = 0;
 
 	// cap the framerate at 60 fps 
-	cummulativeTime += t;
-	if (cummulativeTime >= FPS60) {
-		cummulativeTime = cummulativeTime - FPS60;
+	cumulativeTime += t;
+	if (cumulativeTime >= FPS60) {
+		cumulativeTime = cumulativeTime - FPS60;
 	}
 	else {
 		return;
@@ -744,6 +744,11 @@ void Render()
 	for(unsigned int i=0; i< g_Boids.size(); i++)
 	{ 
 		g_Boids[i]->update(t, &g_Boids, g_Predators);
+        if (!g_Boids[i]->getAlive())
+        {
+            delete g_Boids[i];
+            g_Boids.erase(remove(g_Boids.begin(), g_Boids.end(), g_Boids[i]), g_Boids.end());
+        }
 		XMMATRIX vp = g_View * g_Projection;
 		Boid* dob = (Boid*)g_Boids[i];
 

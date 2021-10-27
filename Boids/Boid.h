@@ -20,6 +20,8 @@ public:
 	void								checkIsOnScreenAndFix(const XMMATRIX&  view, const XMMATRIX&  proj);
 	void								update(float t, vecBoid* boidList, vector<Predator*> predatorList);
 
+	bool								getAlive() { return isAlive; }
+
 protected:
 	void								setDirection(XMFLOAT3 direction);
 
@@ -45,7 +47,8 @@ protected:
 	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
 	float								cohesionScale = COHESIONSCALE_DEFAULT;
 	float								fleeScale = FLEESCALE_DEFAULT;
-	float								fleeDistance = 100.0f;
+	float								fleeDistance = 150.0f;
 	float								killDistance = 2.0f;
+	bool								isAlive = true;
 };
 
