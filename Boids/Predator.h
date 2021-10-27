@@ -1,7 +1,8 @@
 #pragma once
 
 #include "DrawableGameObject.h"
-#include "Boid.h"
+
+class Boid;
 
 class Predator : public DrawableGameObject
 {

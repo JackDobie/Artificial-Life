@@ -1,4 +1,5 @@
 #include "Boid.h"
+#include "Predator.h"
 
 #define NEARBY_DISTANCE	35.0f // how far boids can see
 
@@ -29,7 +30,7 @@ void Boid::setDirection(XMFLOAT3 direction)
 	XMStoreFloat3(&m_direction, v);
 }
 
-void Boid::update(float t, vecBoid* boidList)
+void Boid::update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 {
 	// create a list of nearby boids
 	vecBoid nearBoids = nearbyBoids(boidList);
@@ -38,15 +39,18 @@ void Boid::update(float t, vecBoid* boidList)
 	XMFLOAT3  vSeparation = calculateSeparationVector(&nearBoids); // vector away from nearest boid
 	XMFLOAT3  vAlignment = calculateAlignmentVector(&nearBoids); // average direction of nearby boids
 	XMFLOAT3  vCohesion = calculateCohesionVector(&nearBoids); // vector towards average position of nearby boids
+	XMFLOAT3  vFlee = calculateFleeVector(predatorList); // vector away from nearby predators
 
 	// multiply each vector by a scale to make some more important than others
 	vSeparation = multiplyFloat3(vSeparation, separationScale);
 	vAlignment = multiplyFloat3(vAlignment, alignmentScale);
 	vCohesion = multiplyFloat3(vCohesion, cohesionScale);
+	vFlee = multiplyFloat3(vFlee, fleeScale);
 
 	// add all three together and normalise
 	m_direction = addFloat3(vSeparation, vAlignment);
 	m_direction = addFloat3(m_direction, vCohesion);
+	m_direction = addFloat3(m_direction, vFlee);
 	if (magnitudeFloat3(m_direction) != 0)
 	{
 		m_direction = normaliseFloat3(m_direction);
@@ -69,9 +73,8 @@ void Boid::update(float t, vecBoid* boidList)
 
 XMFLOAT3 Boid::calculateSeparationVector(vecBoid* boidList)
 {
-	XMFLOAT3 nearby = XMFLOAT3(0, 0, 0);
 	if (boidList == nullptr)
-		return nearby;
+		return XMFLOAT3(0, 0, 0);
 
 	// work out which is nearest fish, and calculate a vector away from that
 	Boid* nearest = nullptr;
@@ -147,12 +150,10 @@ XMFLOAT3 Boid::calculateCohesionVector(vecBoid* boidList)
 	return normaliseFloat3(nearby); // nearby is the direction to where the other drawables are
 }
 
-
 XMFLOAT3 Boid::vecToNearbyBoids(vecBoid* boidList)
 {
-	XMFLOAT3 nearby = XMFLOAT3(0, 0, 0);
 	if (boidList == nullptr)
-		return nearby;
+		return XMFLOAT3(0, 0, 0);
 
 	// work out which is nearest fish, and calculate a vector away from that
 	Boid* nearest = nullptr;
@@ -190,8 +191,34 @@ XMFLOAT3 Boid::vecToNearbyBoids(vecBoid* boidList)
 		return normaliseFloat3(directionNearest);
 	}
 
-	// if there is not a nearby fish - simply return the current direction. 
-	return normaliseFloat3(m_direction);
+	// if there is not a nearby fish return 0
+	return XMFLOAT3(0, 0, 0);
+}
+
+XMFLOAT3 Boid::calculateFleeVector(vector<Predator*> predatorList)
+{
+	if (predatorList.empty())
+		return XMFLOAT3(0, 0, 0);
+
+	XMFLOAT3 dir = XMFLOAT3(0, 0, 0);
+
+	for (Predator* p : predatorList)
+	{
+		// calculate the distance to each predator and find the shortest
+		XMFLOAT3 vP = *(p->getPosition());
+		XMFLOAT3 vDiff = subtractFloat3(m_position, vP);
+		float l = magnitudeFloat3(vDiff);
+		if (l < killDistance)
+		{
+			// kill
+		}
+		if (l < fleeDistance)
+		{
+			dir = addFloat3(dir, vDiff);
+		}
+	}
+
+	return dir;
 }
 
 // use but don't alter the methods below
@@ -273,7 +300,6 @@ vecBoid Boid::nearbyBoids(vecBoid* boidList)
 
 	return nearBoids;
 }
-
 
 void Boid::checkIsOnScreenAndFix(const XMMATRIX&  view, const XMMATRIX&  proj)
 {

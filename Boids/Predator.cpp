@@ -1,4 +1,5 @@
 #include "Predator.h"
+#include "Boid.h"
 
 Predator::Predator()
 {
@@ -31,7 +32,16 @@ void Predator::Update(float t, vecBoid* boidList)
 {
 	m_direction = VecToNearbyBoids(boidList);
 
-	float speed = 100.0f;
+	if (MagnitudeFloat3(m_direction) != 0)
+	{
+		m_direction = NormaliseFloat3(m_direction);
+	}
+	else
+	{
+		CreateRandomDirection(); // if no direction, make one
+	}
+
+	float speed = 110.0f;
 	XMFLOAT3 dir = MultiplyFloat3(m_direction, t * speed);
 	m_position = AddFloat3(m_position, dir);
 
@@ -43,32 +53,24 @@ void Predator::Update(float t, vecBoid* boidList)
 
 XMFLOAT3 Predator::VecToNearbyBoids(vecBoid* boidList)
 {
-	XMFLOAT3 nearby = XMFLOAT3(0, 0, 0);
 	if (boidList == nullptr)
-		return nearby;
+		return XMFLOAT3(0, 0, 0);
 
-	// work out which is nearest fish, and calculate a vector away from that
+	// work out which is nearest fish, and calculate a vector towards that
 	Boid* nearest = nullptr;
 	XMFLOAT3 directionNearest;
 	float shortestDistance = FLT_MAX;
 
 	for (Boid* b : *boidList)
 	{
-		if (nearest == nullptr)
+		// calculate the distance to each boid and find the shortest
+		XMFLOAT3 vB = *(b->getPosition());
+		XMFLOAT3 vDiff = SubtractFloat3(m_position, vB);
+		float l = MagnitudeFloat3(vDiff);
+		if (l < shortestDistance)
 		{
+			shortestDistance = l;
 			nearest = b;
-		}
-		else
-		{
-			// calculate the distance to each boid and find the shortest
-			XMFLOAT3 vB = *(b->getPosition());
-			XMFLOAT3 vDiff = SubtractFloat3(m_position, vB);
-			float l = MagnitudeFloat3(vDiff);
-			if (l < shortestDistance)
-			{
-				shortestDistance = l;
-				nearest = b;
-			}
 		}
 	}
 
@@ -79,8 +81,8 @@ XMFLOAT3 Predator::VecToNearbyBoids(vecBoid* boidList)
 		return NormaliseFloat3(directionNearest);
 	}
 
-	// if there is not a nearby fish - simply return the current direction. 
-	return NormaliseFloat3(m_direction);
+	// if there is not a nearby fish return 0
+	return XMFLOAT3(0, 0, 0);
 }
 
 XMFLOAT3 Predator::AddFloat3(XMFLOAT3& f1, XMFLOAT3& f2)

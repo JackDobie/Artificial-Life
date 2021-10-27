@@ -743,7 +743,7 @@ void Render()
 
 	for(unsigned int i=0; i< g_Boids.size(); i++)
 	{ 
-		g_Boids[i]->update(t, &g_Boids);
+		g_Boids[i]->update(t, &g_Boids, g_Predators);
 		XMMATRIX vp = g_View * g_Projection;
 		Boid* dob = (Boid*)g_Boids[i];
 
