@@ -9,6 +9,7 @@ Predator::Predator()
 
 Predator::~Predator()
 {
+	if (targetedBoid != nullptr) targetedBoid = nullptr; delete targetedBoid;
 }
 
 void Predator::CreateRandomDirection()
@@ -63,19 +64,28 @@ XMFLOAT3 Predator::VecToNearbyBoids(vecBoid* boidList)
 
 	for (Boid* b : *boidList)
 	{
-		// calculate the distance to each boid and find the shortest
-		XMFLOAT3 vB = *(b->getPosition());
-		XMFLOAT3 vDiff = SubtractFloat3(m_position, vB);
-		float l = MagnitudeFloat3(vDiff);
-		if (l < shortestDistance)
+		if (!b->getTargeted() || b == targetedBoid)
 		{
-			shortestDistance = l;
-			nearest = b;
+			// calculate the distance to each boid and find the shortest
+			XMFLOAT3 vB = *(b->getPosition());
+			XMFLOAT3 vDiff = SubtractFloat3(m_position, vB);
+			float l = MagnitudeFloat3(vDiff);
+			if (l < shortestDistance)
+			{
+				shortestDistance = l;
+				nearest = b;
+			}
 		}
 	}
 
 	if (nearest != nullptr)
 	{
+		if(targetedBoid != nullptr)
+			targetedBoid->setTargeted(false);
+
+		targetedBoid = nearest;
+		targetedBoid->setTargeted(true);
+
 		// get the direction from nearest boid to current boid
 		directionNearest = SubtractFloat3(*nearest->getPosition(), m_position);
 		return NormaliseFloat3(directionNearest);

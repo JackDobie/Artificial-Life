@@ -29,4 +29,6 @@ protected:
 	XMFLOAT3							DivideFloat3(XMFLOAT3& f1, const float scalar);
 
 	XMFLOAT3							m_direction;
+
+	Boid*								targetedBoid = nullptr;
 };

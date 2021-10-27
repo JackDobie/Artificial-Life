@@ -97,7 +97,8 @@ void placePredator()
     hr = pred->initMesh(g_pd3dDevice, g_pImmediateContext);
     if (FAILED(hr))
         return;
-    pred->setPosition(XMFLOAT3(500.0f, 500.0f, 0));
+    float randomFlt = (((float)rand()) / (float)RAND_MAX) * (500 - -500);
+    pred->setPosition(XMFLOAT3(randomFlt, randomFlt, 0));
     g_Predators.push_back(pred);
 }
 
@@ -516,7 +517,10 @@ HRESULT		InitMesh()
         placeFish();
     }
 
-    placePredator();
+    for (int i = 0; i < 2; i++)
+    {
+        placePredator();
+    }
     
     // create square
     for (Boid* b : g_Boids)

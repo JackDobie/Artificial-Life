@@ -21,6 +21,9 @@ public:
 	void								update(float t, vecBoid* boidList, vector<Predator*> predatorList);
 
 	bool								getAlive() { return isAlive; }
+	
+	bool								getTargeted() { return targeted; }
+	void								setTargeted(bool target) { targeted = target; }
 
 protected:
 	void								setDirection(XMFLOAT3 direction);
@@ -50,5 +53,7 @@ protected:
 	float								fleeDistance = 150.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
+private:
+	bool								targeted = false; // used by predators to avoid multiple predators targeting the same boid
 };
 
