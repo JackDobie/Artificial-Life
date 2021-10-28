@@ -18,7 +18,8 @@
 
 #include <algorithm>
 #include <vector>
-#include <time.h>  
+#include <time.h>
+#include <string>
 #include "Boid.h"
 #include "Predator.h"
 
@@ -748,33 +749,44 @@ void Render()
 	for(unsigned int i=0; i< g_Boids.size(); i++)
 	{ 
 		g_Boids[i]->update(t, &g_Boids, g_Predators);
-        if (!g_Boids[i]->getAlive())
+        
+        if(g_Boids[i]->getAlive())
         {
+            XMMATRIX vp = g_View * g_Projection;
+            Boid* dob = (Boid*)g_Boids[i];
+
+            dob->checkIsOnScreenAndFix(g_View, g_Projection);
+
+            setupTransformConstantBuffer(i);
+            setupLightingConstantBuffer();
+            setupMaterialConstantBuffer(i);
+
+            // Render a cube
+            g_pImmediateContext->VSSetShader(g_pVertexShader, nullptr, 0);
+            g_pImmediateContext->VSSetConstantBuffers(0, 1, &g_pConstantBuffer);
+
+            g_pImmediateContext->PSSetShader(g_pPixelShader, nullptr, 0);
+            g_pImmediateContext->PSSetConstantBuffers(1, 1, &g_pMaterialConstantBuffer);
+            g_pImmediateContext->PSSetConstantBuffers(2, 1, &g_pLightConstantBuffer);
+
+            g_pImmediateContext->PSSetShaderResources(0, 1, g_Boids[i]->getTextureResourceView());
+            g_pImmediateContext->PSSetSamplers(0, 1, g_Boids[i]->getTextureSamplerState());
+
+            // draw 
+            g_Boids[i]->draw(g_pImmediateContext);
+        }
+        else
+        {
+            // remove boid from list
+            g_Boids[i] = nullptr;
             delete g_Boids[i];
             g_Boids.erase(remove(g_Boids.begin(), g_Boids.end(), g_Boids[i]), g_Boids.end());
+
+            // output number of boids left
+            char sz[1024] = { 0 };
+            sprintf_s(sz, "%d \n", g_Boids.size());
+            OutputDebugStringA(sz);
         }
-		XMMATRIX vp = g_View * g_Projection;
-		Boid* dob = (Boid*)g_Boids[i];
-
-		dob->checkIsOnScreenAndFix(g_View, g_Projection);
-
-		setupTransformConstantBuffer(i);
-		setupLightingConstantBuffer();
-		setupMaterialConstantBuffer(i);
-
-		// Render a cube
-		g_pImmediateContext->VSSetShader( g_pVertexShader, nullptr, 0 );
-		g_pImmediateContext->VSSetConstantBuffers( 0, 1, &g_pConstantBuffer );
-	
-		g_pImmediateContext->PSSetShader( g_pPixelShader, nullptr, 0 );
-		g_pImmediateContext->PSSetConstantBuffers(1, 1, &g_pMaterialConstantBuffer);
-		g_pImmediateContext->PSSetConstantBuffers(2, 1, &g_pLightConstantBuffer);
-
-		g_pImmediateContext->PSSetShaderResources(0, 1, g_Boids[i]->getTextureResourceView() );
-		g_pImmediateContext->PSSetSamplers(0, 1, g_Boids[i]->getTextureSamplerState());
-
-		// draw 
-		g_Boids[i]->draw(g_pImmediateContext);
 	}
 
     for (unsigned int i = 0; i < g_Predators.size(); i++)
