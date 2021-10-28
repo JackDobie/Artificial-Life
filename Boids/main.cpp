@@ -22,6 +22,7 @@
 #include <string>
 #include "Boid.h"
 #include "Predator.h"
+#include "Debug.h"
 
 
 //--------------------------------------------------------------------------------------
@@ -783,9 +784,7 @@ void Render()
             g_Boids.erase(remove(g_Boids.begin(), g_Boids.end(), g_Boids[i]), g_Boids.end());
 
             // output number of boids left
-            char sz[1024] = { 0 };
-            sprintf_s(sz, "%d \n", g_Boids.size());
-            OutputDebugStringA(sz);
+            Debug::Print((int)g_Boids.size());
         }
 	}
 
