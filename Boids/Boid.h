@@ -3,9 +3,9 @@
 #include "DrawableGameObject.h"
 
 // default scales for the forces applied to boids
-#define SEPARATIONSCALE_DEFAULT	1.1f
+#define SEPARATIONSCALE_DEFAULT	0.7f
 #define ALIGNMENTSCALE_DEFAULT	2.0f
-#define COHESIONSCALE_DEFAULT	1.0f
+#define COHESIONSCALE_DEFAULT	0.7f
 #define FLEESCALE_DEFAULT		10.0f
 
 class Predator;

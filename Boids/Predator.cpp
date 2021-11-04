@@ -31,7 +31,9 @@ void Predator::SetDirection(XMFLOAT3 direction)
 
 void Predator::Update(float t, vecBoid* boidList)
 {
-	m_direction = VecToNearbyBoids(boidList);
+	XMFLOAT3 nearbyBoidsVec = VecToNearbyBoids(boidList);
+	m_direction = AddFloat3(m_direction, nearbyBoidsVec);
+	//m_direction = VecToNearbyBoids(boidList);
 
 	if (MagnitudeFloat3(m_direction) != 0)
 	{
@@ -42,7 +44,7 @@ void Predator::Update(float t, vecBoid* boidList)
 		CreateRandomDirection(); // if no direction, make one
 	}
 
-	float speed = 110.0f;
+	float speed = 160.0f;
 	XMFLOAT3 dir = MultiplyFloat3(m_direction, t * speed);
 	m_position = AddFloat3(m_position, dir);
 

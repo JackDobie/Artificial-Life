@@ -10,6 +10,7 @@
       <Filter>Core %28no need to alter%29</Filter>
     </ClCompile>
     <ClCompile Include="Predator.cpp" />
+    <ClCompile Include="Debug.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
@@ -29,6 +30,7 @@
       <Filter>Core %28no need to alter%29</Filter>
     </ClInclude>
     <ClInclude Include="Predator.h" />
+    <ClInclude Include="Debug.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\floor.dds">

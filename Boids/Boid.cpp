@@ -1,7 +1,7 @@
 #include "Boid.h"
 #include "Predator.h"
 
-#define NEARBY_DISTANCE	35.0f // how far boids can see
+#define NEARBY_DISTANCE	20.0f // how far boids can see
 
 Boid::Boid()
 {
@@ -47,8 +47,9 @@ void Boid::update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 	vCohesion = multiplyFloat3(vCohesion, cohesionScale);
 	vFlee = multiplyFloat3(vFlee, fleeScale);
 
-	// add all three together and normalise
-	m_direction = addFloat3(vSeparation, vAlignment);
+	// add all four together and normalise
+	m_direction = addFloat3(m_direction, vSeparation);
+	m_direction = addFloat3(m_direction, vAlignment);
 	m_direction = addFloat3(m_direction, vCohesion);
 	m_direction = addFloat3(m_direction, vFlee);
 	if (magnitudeFloat3(m_direction) != 0)
@@ -57,11 +58,10 @@ void Boid::update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 	}
 	else
 	{
-		//createRandomDirection(); // if no direction, make one
-		m_direction = vecToNearbyBoids(boidList);
+		m_direction = vecToNearbyBoids(boidList); // if no direction, go to the nearest boid
 	}
 
-	float speed = 100.0f;
+	float speed = 150.0f;
 	XMFLOAT3 dir = multiplyFloat3(m_direction, t * speed);
 	m_position = addFloat3(m_position, dir);
 
@@ -109,7 +109,16 @@ XMFLOAT3 Boid::calculateSeparationVector(vecBoid* boidList)
 	{
 		// get the direction from nearest boid to current boid
 		directionNearest = subtractFloat3(m_position, *nearest->getPosition());
-		return normaliseFloat3(directionNearest);
+		directionNearest = normaliseFloat3(directionNearest);
+		if (shortestDistance < 2.0f)
+		{
+			separationScale = 10.0f;
+		}
+		else
+		{
+			separationScale = SEPARATIONSCALE_DEFAULT;
+		}
+		return directionNearest;
 	}
 
 	// if there is not a nearby fish - simply return the current direction. 
