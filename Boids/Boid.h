@@ -8,6 +8,8 @@
 #define COHESIONSCALE_DEFAULT	0.7f
 #define FLEESCALE_DEFAULT		10.0f
 
+#define SPEED_DEFAULT			150.0f
+
 class Predator;
 
 class Boid : public DrawableGameObject
@@ -16,32 +18,34 @@ public:
 	Boid();
 	~Boid();
 
-	XMFLOAT3*							getDirection() { return &m_direction; }
-	void								checkIsOnScreenAndFix(const XMMATRIX&  view, const XMMATRIX&  proj);
-	void								update(float t, vecBoid* boidList, vector<Predator*> predatorList);
+	XMFLOAT3*							GetDirection() { return &m_direction; }
+	void								CheckIsOnScreenAndFix(const XMMATRIX&  view, const XMMATRIX&  proj);
+	void								Update(float t, vecBoid* boidList, vector<Predator*> predatorList);
 
-	bool								getAlive() { return isAlive; }
+	bool								GetAlive() { return isAlive; }
 	
-	bool								getTargeted() { return targeted; }
-	void								setTargeted(bool target) { targeted = target; }
+	bool								GetTargeted() { return targeted; }
+	void								SetTargeted(bool target) { targeted = target; }
 
 protected:
-	void								setDirection(XMFLOAT3 direction);
+	void								SetDirection(XMFLOAT3 direction);
 
-	vecBoid								nearbyBoids(vecBoid* boidList);
-	XMFLOAT3							calculateSeparationVector(vecBoid* boidList);
-	XMFLOAT3							calculateAlignmentVector(vecBoid* boidList);
-	XMFLOAT3							calculateCohesionVector(vecBoid* boidList);
-	XMFLOAT3							vecToNearbyBoids(vecBoid* boidList);
-	XMFLOAT3							calculateFleeVector(vector<Predator*> predatorList);
-	void								createRandomDirection();
+	vecBoid								NearbyBoids(vecBoid* boidList);
+	XMFLOAT3							CalculateSeparationVector(vecBoid* boidList);
+	XMFLOAT3							CalculateAlignmentVector(vecBoid* boidList);
+	XMFLOAT3							CalculateCohesionVector(vecBoid* boidList);
+	XMFLOAT3							VecToNearbyBoids(vecBoid* boidList);
+	XMFLOAT3							CalculateFleeVector(vector<Predator*> predatorList);
+	void								CreateRandomDirection();
 
-	XMFLOAT3							addFloat3(XMFLOAT3& f1, XMFLOAT3& f2);
-	XMFLOAT3							subtractFloat3(XMFLOAT3& f1, XMFLOAT3& f2);
-	XMFLOAT3							normaliseFloat3(XMFLOAT3& f1);
-	float								magnitudeFloat3(XMFLOAT3& f1);
-	XMFLOAT3							multiplyFloat3(XMFLOAT3& f1, const float scalar);
-	XMFLOAT3							divideFloat3(XMFLOAT3& f1, const float scalar);
+	XMFLOAT3							AddFloat3(XMFLOAT3& f1, XMFLOAT3& f2);
+	XMFLOAT3							SubtractFloat3(XMFLOAT3& f1, XMFLOAT3& f2);
+	XMFLOAT3							NormaliseFloat3(XMFLOAT3& f1);
+	float								MagnitudeFloat3(XMFLOAT3& f1);
+	XMFLOAT3							MultiplyFloat3(XMFLOAT3& f1, const float scalar);
+	XMFLOAT3							DivideFloat3(XMFLOAT3& f1, const float scalar);
+
+	float								GetAngle(XMFLOAT3 pos1, XMFLOAT3 pos2);
 
 	XMFLOAT3							m_direction;
 	//unsigned int*						m_nearbyDrawables;
@@ -53,6 +57,10 @@ protected:
 	float								fleeDistance = 150.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
+
+	float								speed = SPEED_DEFAULT;
+	float								FOV = 90.0f;
+	bool								scared = false;
 private:
 	bool								targeted = false; // used by predators to avoid multiple predators targeting the same boid
 };

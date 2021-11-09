@@ -749,14 +749,14 @@ void Render()
 
 	for(unsigned int i=0; i< g_Boids.size(); i++)
 	{ 
-		g_Boids[i]->update(t, &g_Boids, g_Predators);
+		g_Boids[i]->Update(t, &g_Boids, g_Predators);
         
-        if(g_Boids[i]->getAlive())
+        if(g_Boids[i]->GetAlive())
         {
             XMMATRIX vp = g_View * g_Projection;
             Boid* dob = (Boid*)g_Boids[i];
 
-            dob->checkIsOnScreenAndFix(g_View, g_Projection);
+            dob->CheckIsOnScreenAndFix(g_View, g_Projection);
 
             setupTransformConstantBuffer(i);
             setupLightingConstantBuffer();
@@ -794,7 +794,7 @@ void Render()
         XMMATRIX vp = g_View * g_Projection;
         Boid* dob = (Boid*)g_Predators[i];
 
-        dob->checkIsOnScreenAndFix(g_View, g_Projection);
+        dob->CheckIsOnScreenAndFix(g_View, g_Projection);
 
         setupTransformConstantBufferPredator(i);
         setupLightingConstantBuffer();

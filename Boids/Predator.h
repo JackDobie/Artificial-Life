@@ -2,6 +2,8 @@
 
 #include "DrawableGameObject.h"
 
+#define SPEED_DEFAULT 170.0f
+
 class Boid;
 
 class Predator : public DrawableGameObject
