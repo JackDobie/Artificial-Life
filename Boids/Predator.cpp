@@ -44,7 +44,6 @@ void Predator::Update(float t, vecBoid* boidList)
 		CreateRandomDirection(); // if no direction, make one
 	}
 
-	float speed = SPEED_DEFAULT;
 	XMFLOAT3 dir = MultiplyFloat3(m_direction, t * speed);
 	m_position = AddFloat3(m_position, dir);
 

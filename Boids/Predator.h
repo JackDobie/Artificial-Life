@@ -2,7 +2,7 @@
 
 #include "DrawableGameObject.h"
 
-#define SPEED_DEFAULT 170.0f
+#define PREDATOR_SPEED_DEFAULT 150.0f
 
 class Boid;
 
@@ -33,4 +33,6 @@ protected:
 	XMFLOAT3							m_direction;
 
 	Boid*								targetedBoid = nullptr;
+
+	float								speed = PREDATOR_SPEED_DEFAULT;
 };

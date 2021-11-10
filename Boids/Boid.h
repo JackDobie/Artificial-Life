@@ -4,11 +4,12 @@
 
 // default scales for the forces applied to boids
 #define SEPARATIONSCALE_DEFAULT	0.7f
-#define ALIGNMENTSCALE_DEFAULT	2.0f
-#define COHESIONSCALE_DEFAULT	0.7f
-#define FLEESCALE_DEFAULT		10.0f
+#define ALIGNMENTSCALE_DEFAULT	1.0f
+#define COHESIONSCALE_DEFAULT	1.0f
+#define FLEESCALE_DEFAULT		5.0f
 
-#define SPEED_DEFAULT			150.0f
+#define SPEED_DEFAULT			90.0f
+#define SPEED_SCARED			160.0f
 
 class Predator;
 
@@ -45,7 +46,7 @@ protected:
 	XMFLOAT3							MultiplyFloat3(XMFLOAT3& f1, const float scalar);
 	XMFLOAT3							DivideFloat3(XMFLOAT3& f1, const float scalar);
 
-	float								GetAngle(XMFLOAT3 pos1, XMFLOAT3 pos2);
+	bool								CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range);
 
 	XMFLOAT3							m_direction;
 	//unsigned int*						m_nearbyDrawables;
@@ -54,12 +55,12 @@ protected:
 	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
 	float								cohesionScale = COHESIONSCALE_DEFAULT;
 	float								fleeScale = FLEESCALE_DEFAULT;
-	float								fleeDistance = 150.0f;
+	float								fleeDistance = 60.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
 
 	float								speed = SPEED_DEFAULT;
-	float								FOV = 90.0f;
+	float								FOV = 40.0f;
 	bool								scared = false;
 private:
 	bool								targeted = false; // used by predators to avoid multiple predators targeting the same boid

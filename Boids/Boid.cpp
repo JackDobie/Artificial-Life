@@ -1,5 +1,6 @@
 #include "Boid.h"
 #include "Predator.h"
+#include "Debug.h"
 
 #define NEARBY_DISTANCE	20.0f // how far boids can see
 
@@ -213,18 +214,37 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 
 	for (Predator* p : predatorList)
 	{
-		// calculate the distance to each predator and find the shortest
+		// calculate the distance to each predator and flee if too close
 		XMFLOAT3 vP = *(p->getPosition());
 		XMFLOAT3 vDiff = SubtractFloat3(m_position, vP);
-		float angle = GetAngle(m_direction, *p->GetDirection());
+		
 		float l = MagnitudeFloat3(vDiff);
 		if (l < killDistance)
 		{
 			isAlive = false;
 		}
-		else if (l < fleeDistance)
+		else
 		{
-			dir = AddFloat3(dir, vDiff);
+			if (CompareAngle(m_direction, vDiff, FOV))
+			{
+				if (l < fleeDistance)
+				{
+					scared = true;
+				}
+				else
+					scared = false;
+			}
+			else
+				scared = false;
+			//TODO: replace this else with a timer to reset scared
+
+			if (scared)
+			{
+				dir = AddFloat3(dir, vDiff);
+			}
+
+			speed = scared ? SPEED_SCARED : SPEED_DEFAULT;
+
 		}
 	}
 
@@ -272,11 +292,36 @@ XMFLOAT3 Boid::DivideFloat3(XMFLOAT3& f1, const float scalar)
 	return out;
 }
 
-float Boid::GetAngle(XMFLOAT3 pos1, XMFLOAT3 pos2)
+bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
 {
-	//get angle between pos1 and pos2
-	float angle = atan2(pos2.z - pos1.z, pos2.x - pos1.x);
-	return angle;
+	// get angle in degrees from vectors
+	float n1 = 270 - atan2(pos1.y, pos1.x) * 180 / XM_PI;
+	float angle1 = fmod(n1, 360);
+
+	float n2 = 270 - atan2(pos2.y, pos2.x) * 180 / XM_PI;
+	float angle2 = fmod(n2, 360);
+
+	float lower = angle1 - range;
+	float upper = angle1 + range;
+
+	// if upper and lower go past 0 or 360 loop around and then 
+	if (lower < 0.0f)
+	{
+		lower = 360.0f + lower;
+	}
+	if (upper > 360.0f)
+	{
+		upper = 360.0f - upper;
+	}
+
+	if (lower <= angle2 || upper >= angle2)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 float Boid::MagnitudeFloat3(XMFLOAT3& f1)

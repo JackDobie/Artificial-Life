@@ -514,7 +514,7 @@ HRESULT		InitMesh()
 		return hr;
 
 
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 200; i++)
     {
         placeFish();
     }
@@ -529,7 +529,7 @@ HRESULT		InitMesh()
     {
         static int i = 0;
         static XMFLOAT3 previousPos = XMFLOAT3(0, 0, 0);
-        float maxX = 100.0f;
+        float maxX = 200.0f;
         XMFLOAT3 pos = *b->getPosition();
         if (previousPos.x < maxX)
         {
@@ -779,7 +779,6 @@ void Render()
         else
         {
             // remove boid from list
-            g_Boids[i] = nullptr;
             delete g_Boids[i];
             g_Boids.erase(remove(g_Boids.begin(), g_Boids.end(), g_Boids[i]), g_Boids.end());
 
