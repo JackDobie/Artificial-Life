@@ -1,15 +1,16 @@
 #pragma once
 
 #include "DrawableGameObject.h"
+#include "Timer.h"
 
 // default scales for the forces applied to boids
-#define SEPARATIONSCALE_DEFAULT	0.7f
-#define ALIGNMENTSCALE_DEFAULT	1.0f
+#define SEPARATIONSCALE_DEFAULT	0.2f
+#define ALIGNMENTSCALE_DEFAULT	0.8f
 #define COHESIONSCALE_DEFAULT	1.0f
-#define FLEESCALE_DEFAULT		5.0f
+#define FLEESCALE_DEFAULT		1.5f
 
-#define SPEED_DEFAULT			90.0f
-#define SPEED_SCARED			160.0f
+#define SPEED_DEFAULT			200.0f
+#define SPEED_SCARED			250.0f
 
 class Predator;
 
@@ -55,13 +56,16 @@ protected:
 	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
 	float								cohesionScale = COHESIONSCALE_DEFAULT;
 	float								fleeScale = FLEESCALE_DEFAULT;
-	float								fleeDistance = 60.0f;
+	float								fleeDistance = 100.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
 
 	float								speed = SPEED_DEFAULT;
-	float								FOV = 40.0f;
+	float								FOV = 20.0f;
 	bool								scared = false;
+	bool								spotPredator = false;
+
+	Timer*								_timer;
 private:
 	bool								targeted = false; // used by predators to avoid multiple predators targeting the same boid
 };

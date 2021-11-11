@@ -11,6 +11,7 @@
     </ClCompile>
     <ClCompile Include="Predator.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
@@ -31,6 +32,7 @@
     </ClInclude>
     <ClInclude Include="Predator.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\floor.dds">

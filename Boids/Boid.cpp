@@ -2,12 +2,13 @@
 #include "Predator.h"
 #include "Debug.h"
 
-#define NEARBY_DISTANCE	20.0f // how far boids can see
+#define NEARBY_DISTANCE	100.0f // how far boids can see
 
 Boid::Boid()
 {
 	m_scale = 1.0f;
 	CreateRandomDirection();
+	_timer = new Timer();
 }
 
 Boid::~Boid()
@@ -33,6 +34,11 @@ void Boid::SetDirection(XMFLOAT3 direction)
 
 void Boid::Update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 {
+	if (_timer->GetActive())
+	{
+		_timer->Update(t);
+	}
+
 	// create a list of nearby boids
 	vecBoid nearBoids = NearbyBoids(boidList);
 
@@ -49,17 +55,21 @@ void Boid::Update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 	vFlee = MultiplyFloat3(vFlee, fleeScale);
 
 	// add all four together and normalise
-	m_direction = AddFloat3(m_direction, vSeparation);
-	m_direction = AddFloat3(m_direction, vAlignment);
-	m_direction = AddFloat3(m_direction, vCohesion);
-	m_direction = AddFloat3(m_direction, vFlee);
+	XMFLOAT3 forces = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	forces = AddFloat3(forces, vSeparation);
+	forces = AddFloat3(forces, vAlignment);
+	forces = AddFloat3(forces, vCohesion);
+	forces = AddFloat3(forces, vFlee);
+	forces = MultiplyFloat3(forces, 0.4f);
+	m_direction = AddFloat3(m_direction, forces);
 	if (MagnitudeFloat3(m_direction) != 0)
 	{
 		m_direction = NormaliseFloat3(m_direction);
 	}
 	else
 	{
-		m_direction = VecToNearbyBoids(boidList); // if no direction, go to the nearest boid
+		CreateRandomDirection();
+		//m_direction = VecToNearbyBoids(boidList); // if no direction, go to the nearest boid
 	}
 
 	float speed = SPEED_DEFAULT;
@@ -111,7 +121,7 @@ XMFLOAT3 Boid::CalculateSeparationVector(vecBoid* boidList)
 		// get the direction from nearest boid to current boid
 		directionNearest = SubtractFloat3(m_position, *nearest->getPosition());
 		directionNearest = NormaliseFloat3(directionNearest);
-		if (shortestDistance < 2.0f)
+		if (shortestDistance < 10.0f)
 		{
 			separationScale = 10.0f;
 		}
@@ -225,26 +235,46 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 		}
 		else
 		{
-			if (CompareAngle(m_direction, vDiff, FOV))
+			spotPredator = false;
+			if (l < fleeDistance)
 			{
-				if (l < fleeDistance)
+				if (CompareAngle(m_direction, vDiff, FOV))
 				{
+					spotPredator = true;
 					scared = true;
 				}
-				else
-					scared = false;
 			}
-			else
-				scared = false;
-			//TODO: replace this else with a timer to reset scared
+			if (spotPredator)
+			{
+				_timer->SetFunc([&]() {scared = false;});
+				_timer->SetLength(0.5f);
+				_timer->Start();
+			}
 
 			if (scared)
 			{
+				speed = SPEED_SCARED;
 				dir = AddFloat3(dir, vDiff);
 			}
+			else
+			{
+				speed = SPEED_DEFAULT;
+			}
 
-			speed = scared ? SPEED_SCARED : SPEED_DEFAULT;
+			//if (l < fleeDistance) // if spotted and in flee distance, become scared and do not return to normal until outside of fleedistance
+			//{
+			//	if (spotted)
+			//	{
+			//		scared = true;
 
+			//		if (speed != SPEED_SCARED)
+			//			Debug::Print("BRUH");
+			//	}
+			//}
+			//else
+			//{
+			//	scared = false;
+			//}
 		}
 	}
 
