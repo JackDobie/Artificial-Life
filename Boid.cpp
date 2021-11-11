@@ -2,17 +2,19 @@
 #include "Predator.h"
 #include "Debug.h"
 
-#define NEARBY_DISTANCE	100.0f // how far boids can see
+#define NEARBY_DISTANCE	50.0f // how far boids can see
 
 Boid::Boid()
 {
 	m_scale = 1.0f;
-	CreateRandomDirection();
 	_timer = new Timer();
+
+	CreateRandomDirection();
 }
 
 Boid::~Boid()
 {
+	delete _timer;
 }
 
 void Boid::CreateRandomDirection()
@@ -60,7 +62,6 @@ void Boid::Update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 	forces = AddFloat3(forces, vAlignment);
 	forces = AddFloat3(forces, vCohesion);
 	forces = AddFloat3(forces, vFlee);
-	forces = MultiplyFloat3(forces, 0.4f);
 	m_direction = AddFloat3(m_direction, forces);
 	if (MagnitudeFloat3(m_direction) != 0)
 	{
@@ -68,11 +69,12 @@ void Boid::Update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 	}
 	else
 	{
-		CreateRandomDirection();
-		//m_direction = VecToNearbyBoids(boidList); // if no direction, go to the nearest boid
+		m_direction = VecToNearbyBoids(boidList); // if no direction, go to the nearest boid
+
+		if (MagnitudeFloat3(m_direction) == 0) // if still no direction (no nearby boids), create random direction
+			CreateRandomDirection();
 	}
 
-	float speed = SPEED_DEFAULT;
 	XMFLOAT3 dir = MultiplyFloat3(m_direction, t * speed);
 	m_position = AddFloat3(m_position, dir);
 
@@ -87,53 +89,45 @@ XMFLOAT3 Boid::CalculateSeparationVector(vecBoid* boidList)
 	if (boidList == nullptr)
 		return XMFLOAT3(0, 0, 0);
 
-	// work out which is nearest fish, and calculate a vector away from that
-	Boid* nearest = nullptr;
-	XMFLOAT3 directionNearest;
-	float shortestDistance = FLT_MAX;
+	float desiredSeparation = 12.5f;
+	XMFLOAT3 nearby = XMFLOAT3(0, 0, 0);
+	int count = 0;
 
 	for (Boid* b : *boidList)
 	{
-		// ignore self
-		if (b == this)
+		// find the distance between boids
+		XMFLOAT3 vB = *(b->getPosition());
+		XMFLOAT3 vDiff = SubtractFloat3(m_position, vB);
+		float l = MagnitudeFloat3(vDiff);
+
+		// ignore self (distance of 0 could only be self)
+		if (l < 0)
+		{
 			continue;
-
-		if (nearest == nullptr)
-		{
-			nearest = b;
 		}
-		else
+
+		// only separate from boids in the desired distance
+		if (l < desiredSeparation)
 		{
-			// calculate the distance to each boid and find the shortest
-			XMFLOAT3 vB = *(b->getPosition());
-			XMFLOAT3 vDiff = SubtractFloat3(m_position, vB);
-			float l = MagnitudeFloat3(vDiff);
-			if (l < shortestDistance)
-			{
-				shortestDistance = l;
-				nearest = b;
-			}
+			XMFLOAT3 dif = NormaliseFloat3(vDiff);
+			dif = DivideFloat3(dif, l); // closer boids will have a greater weight
+			nearby = AddFloat3(nearby, dif);
+
+			count++;
 		}
 	}
 
-	if (nearest != nullptr) 
+	if (count > 0)
 	{
-		// get the direction from nearest boid to current boid
-		directionNearest = SubtractFloat3(m_position, *nearest->getPosition());
-		directionNearest = NormaliseFloat3(directionNearest);
-		if (shortestDistance < 10.0f)
+		nearby = DivideFloat3(nearby, count);
+
+		if (MagnitudeFloat3(nearby) > 0)
 		{
-			separationScale = 10.0f;
+			nearby = NormaliseFloat3(nearby);
 		}
-		else
-		{
-			separationScale = SEPARATIONSCALE_DEFAULT;
-		}
-		return directionNearest;
 	}
 
-	// if there is not a nearby fish - simply return the current direction. 
-	return NormaliseFloat3(m_direction);
+	return nearby;
 }
 
 XMFLOAT3 Boid::CalculateAlignmentVector(vecBoid* boidList)
@@ -346,6 +340,7 @@ bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
 
 	if (lower <= angle2 || upper >= angle2)
 	{
+		static int l = 0;
 		return true;
 	}
 	else

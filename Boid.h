@@ -4,13 +4,13 @@
 #include "Timer.h"
 
 // default scales for the forces applied to boids
-#define SEPARATIONSCALE_DEFAULT	0.2f
-#define ALIGNMENTSCALE_DEFAULT	0.8f
+#define SEPARATIONSCALE_DEFAULT	1.5f
+#define ALIGNMENTSCALE_DEFAULT	1.0f
 #define COHESIONSCALE_DEFAULT	1.0f
 #define FLEESCALE_DEFAULT		1.5f
 
-#define SPEED_DEFAULT			200.0f
-#define SPEED_SCARED			250.0f
+#define SPEED_DEFAULT			140.0f
+#define SPEED_SCARED			170.0f
 
 class Predator;
 
@@ -50,18 +50,19 @@ protected:
 	bool								CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range);
 
 	XMFLOAT3							m_direction;
+
 	//unsigned int*						m_nearbyDrawables;
 
 	float								separationScale = SEPARATIONSCALE_DEFAULT;
 	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
 	float								cohesionScale = COHESIONSCALE_DEFAULT;
 	float								fleeScale = FLEESCALE_DEFAULT;
-	float								fleeDistance = 100.0f;
+	float								fleeDistance = 150.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
 
 	float								speed = SPEED_DEFAULT;
-	float								FOV = 20.0f;
+	float								FOV = 60.0f;
 	bool								scared = false;
 	bool								spotPredator = false;
 

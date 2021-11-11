@@ -2,7 +2,7 @@
 
 #include "DrawableGameObject.h"
 
-#define PREDATOR_SPEED_DEFAULT 220.0f
+#define PREDATOR_SPEED_DEFAULT 165.0f
 
 class Boid;
 
