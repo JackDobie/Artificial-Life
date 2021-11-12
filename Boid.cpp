@@ -7,14 +7,14 @@
 Boid::Boid()
 {
 	m_scale = 1.0f;
-	//_timer = new Timer();
-
+	speed = SPEED_DEFAULT + (rand() % 100);
+	FOV += (rand() % 225);
+	fleeDistance += (rand() % 100);
 	CreateRandomDirection();
 }
 
 Boid::~Boid()
 {
-	//if(_timer != nullptr) delete _timer;
 }
 
 void Boid::CreateRandomDirection()
@@ -36,11 +36,6 @@ void Boid::SetDirection(XMFLOAT3 direction)
 
 void Boid::Update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 {
-	/*if (_timer->GetActive())
-	{
-		_timer->Update(t);
-	}*/
-
 	// create a list of nearby boids
 	vecBoid nearBoids = NearbyBoids(boidList);
 
@@ -237,25 +232,12 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 				if (CompareAngle(m_direction, toPredator, FOV))
 				{
 					spotPredator = true;
-					//scared = true;
 				}
 			}
-			/*if (spotPredator)
-			{
-				_timer->Stop();
-				_timer->SetFunc([&]() {scared = false;});
-				_timer->SetLength(0.01f);
-				_timer->Start();
-			}*/
 
 			if (spotPredator)
 			{
-				speed = SPEED_SCARED;
 				dir = AddFloat3(dir, vDiff);
-			}
-			else
-			{
-				speed = SPEED_DEFAULT;
 			}
 		}
 		else
