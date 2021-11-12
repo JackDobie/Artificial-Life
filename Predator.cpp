@@ -56,7 +56,6 @@ void Predator::Update(float t, vecBoid* boidList)
 XMFLOAT3 Predator::VecToNearbyBoids(vecBoid* boidList)
 {
 	XMFLOAT3 nearby = XMFLOAT3(0, 0, 0);
-	int count = 0;
 
 	for (Boid* b : *boidList)
 	{
@@ -67,18 +66,12 @@ XMFLOAT3 Predator::VecToNearbyBoids(vecBoid* boidList)
 		vDiff = NormaliseFloat3(vDiff);
 		vDiff = DivideFloat3(vDiff, l); // closer boids will have a greater weight
 		nearby = AddFloat3(nearby, vDiff);
-
-		count++;
 	}
 
-	if (count > 0)
+	if (MagnitudeFloat3(nearby) > 0)
 	{
-		nearby = DivideFloat3(nearby, count);
-
-		if (MagnitudeFloat3(nearby) > 0)
-		{
-			nearby = NormaliseFloat3(nearby);
-		}
+		nearby = DivideFloat3(nearby, boidList->size());
+		nearby = NormaliseFloat3(nearby);
 	}
 
 	return nearby;

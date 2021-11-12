@@ -117,14 +117,10 @@ XMFLOAT3 Boid::CalculateSeparationVector(vecBoid* boidList)
 		}
 	}
 
-	if (count > 0)
+	if (MagnitudeFloat3(nearby) > 0)
 	{
 		nearby = DivideFloat3(nearby, count);
-
-		if (MagnitudeFloat3(nearby) > 0)
-		{
-			nearby = NormaliseFloat3(nearby);
-		}
+		nearby = NormaliseFloat3(nearby);
 	}
 
 	return nearby;
@@ -241,6 +237,7 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 			}
 			if (spotPredator)
 			{
+				_timer->Stop();
 				_timer->SetFunc([&]() {scared = false;});
 				_timer->SetLength(0.5f);
 				_timer->Start();
@@ -274,6 +271,56 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 	}
 
 	return dir;
+}
+
+bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
+{
+	// get angle in degrees from vectors
+	float n1 = 270 - atan2(pos1.y, pos1.x) * 180 / XM_PI;
+	float angle1 = fmod(n1, 360);
+
+	float n2 = 270 - atan2(pos2.y, pos2.x) * 180 / XM_PI;
+	float angle2 = fmod(n2, 360);
+
+	float lower = angle1 - range;
+	float upper = angle1 + range;
+
+	// if upper and lower go past 0 or 360 loop around and then 
+	if (lower < 0.0f)
+	{
+		lower += 360.0f;
+	}
+	if (upper > 360.0f)
+	{
+		upper -= 360.0f;
+	}
+
+	// check if angle in range
+	if (lower <= angle2 && angle2 <= upper)
+	{
+		return true;
+	}
+	else if (upper - lower <= 0.0f)
+	{
+		// either upper or lower have looped around
+		if (lower <= angle2 && angle2 <= 360.0f)
+		{
+			// angle between lower and 360
+			return true;
+		}
+		else if (0.0f <= angle2 && angle2 <= upper)
+		{
+			// angle between 0 and upper
+			return true;
+		}
+	}
+
+	/*Debug::Print("Lower: " + to_string(lower));
+	Debug::Print("Upper: " + to_string(upper));
+	Debug::Print("Angle: " + to_string(angle2));*/
+
+	// angle not in range - return false
+	return false;
 }
 
 // use but don't alter the methods below
@@ -315,39 +362,6 @@ XMFLOAT3 Boid::DivideFloat3(XMFLOAT3& f1, const float scalar)
 	out.z = f1.z / scalar;
 
 	return out;
-}
-
-bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
-{
-	// get angle in degrees from vectors
-	float n1 = 270 - atan2(pos1.y, pos1.x) * 180 / XM_PI;
-	float angle1 = fmod(n1, 360);
-
-	float n2 = 270 - atan2(pos2.y, pos2.x) * 180 / XM_PI;
-	float angle2 = fmod(n2, 360);
-
-	float lower = angle1 - range;
-	float upper = angle1 + range;
-
-	// if upper and lower go past 0 or 360 loop around and then 
-	if (lower < 0.0f)
-	{
-		lower = 360.0f + lower;
-	}
-	if (upper > 360.0f)
-	{
-		upper = 360.0f - upper;
-	}
-
-	if (lower <= angle2 || upper >= angle2)
-	{
-		static int l = 0;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
 }
 
 float Boid::MagnitudeFloat3(XMFLOAT3& f1)

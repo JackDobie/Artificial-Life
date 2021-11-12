@@ -40,14 +40,14 @@ protected:
 	XMFLOAT3							CalculateFleeVector(vector<Predator*> predatorList);
 	void								CreateRandomDirection();
 
+	bool								CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range);
+
 	XMFLOAT3							AddFloat3(XMFLOAT3& f1, XMFLOAT3& f2);
 	XMFLOAT3							SubtractFloat3(XMFLOAT3& f1, XMFLOAT3& f2);
 	XMFLOAT3							NormaliseFloat3(XMFLOAT3& f1);
 	float								MagnitudeFloat3(XMFLOAT3& f1);
 	XMFLOAT3							MultiplyFloat3(XMFLOAT3& f1, const float scalar);
 	XMFLOAT3							DivideFloat3(XMFLOAT3& f1, const float scalar);
-
-	bool								CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range);
 
 	XMFLOAT3							m_direction;
 
@@ -57,12 +57,12 @@ protected:
 	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
 	float								cohesionScale = COHESIONSCALE_DEFAULT;
 	float								fleeScale = FLEESCALE_DEFAULT;
-	float								fleeDistance = 40.0f;
+	float								fleeDistance = 100.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
 
 	float								speed = SPEED_DEFAULT;
-	float								FOV = 60.0f;
+	float								FOV = 135.0f;
 	bool								scared = false;
 	bool								spotPredator = false;
 	const bool							canDie = false;
