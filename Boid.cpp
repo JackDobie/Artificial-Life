@@ -225,7 +225,8 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 		float l = MagnitudeFloat3(vDiff);
 		if (l < killDistance)
 		{
-			isAlive = false;
+			if(canDie)
+				isAlive = false;
 		}
 		else
 		{

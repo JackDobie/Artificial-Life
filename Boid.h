@@ -7,10 +7,10 @@
 #define SEPARATIONSCALE_DEFAULT	1.5f
 #define ALIGNMENTSCALE_DEFAULT	1.0f
 #define COHESIONSCALE_DEFAULT	1.0f
-#define FLEESCALE_DEFAULT		1.5f
+#define FLEESCALE_DEFAULT		2.0f
 
-#define SPEED_DEFAULT			140.0f
-#define SPEED_SCARED			170.0f
+#define SPEED_DEFAULT			150.0f
+#define SPEED_SCARED			150.0f
 
 class Predator;
 
@@ -57,7 +57,7 @@ protected:
 	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
 	float								cohesionScale = COHESIONSCALE_DEFAULT;
 	float								fleeScale = FLEESCALE_DEFAULT;
-	float								fleeDistance = 150.0f;
+	float								fleeDistance = 40.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
 
@@ -65,6 +65,7 @@ protected:
 	float								FOV = 60.0f;
 	bool								scared = false;
 	bool								spotPredator = false;
+	const bool							canDie = false;
 
 	Timer*								_timer;
 private:

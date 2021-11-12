@@ -78,6 +78,9 @@ int						g_viewHeight;
 vecBoid					g_Boids;
 vector<Predator*>       g_Predators;
 
+const int               boidCount = 300;
+const int               predatorCount = 1;
+
 
 void placeFish()
 {
@@ -514,12 +517,12 @@ HRESULT		InitMesh()
 		return hr;
 
 
-    for (int i = 0; i < 300; i++)
+    for (int i = 0; i < boidCount; i++)
     {
         placeFish();
     }
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < predatorCount; i++)
     {
         placePredator();
     }
