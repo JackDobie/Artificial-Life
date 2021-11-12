@@ -7,7 +7,7 @@
 #define SEPARATIONSCALE_DEFAULT	1.5f
 #define ALIGNMENTSCALE_DEFAULT	1.0f
 #define COHESIONSCALE_DEFAULT	1.0f
-#define FLEESCALE_DEFAULT		2.0f
+#define FLEESCALE_DEFAULT		10.0f
 
 #define SPEED_DEFAULT			150.0f
 #define SPEED_SCARED			150.0f
@@ -57,17 +57,17 @@ protected:
 	float								alignmentScale = ALIGNMENTSCALE_DEFAULT;
 	float								cohesionScale = COHESIONSCALE_DEFAULT;
 	float								fleeScale = FLEESCALE_DEFAULT;
-	float								fleeDistance = 100.0f;
+	float								fleeDistance = 80.0f;
 	float								killDistance = 2.0f;
 	bool								isAlive = true;
 
 	float								speed = SPEED_DEFAULT;
-	float								FOV = 135.0f;
+	float								FOV = 180.0f;
 	bool								scared = false;
 	bool								spotPredator = false;
 	const bool							canDie = false;
 
-	Timer*								_timer;
+	//Timer*								_timer;
 private:
 	bool								targeted = false; // used by predators to avoid multiple predators targeting the same boid
 };

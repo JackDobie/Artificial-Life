@@ -7,14 +7,14 @@
 Boid::Boid()
 {
 	m_scale = 1.0f;
-	_timer = new Timer();
+	//_timer = new Timer();
 
 	CreateRandomDirection();
 }
 
 Boid::~Boid()
 {
-	delete _timer;
+	//if(_timer != nullptr) delete _timer;
 }
 
 void Boid::CreateRandomDirection()
@@ -36,16 +36,16 @@ void Boid::SetDirection(XMFLOAT3 direction)
 
 void Boid::Update(float t, vecBoid* boidList, vector<Predator*> predatorList)
 {
-	if (_timer->GetActive())
+	/*if (_timer->GetActive())
 	{
 		_timer->Update(t);
-	}
+	}*/
 
 	// create a list of nearby boids
 	vecBoid nearBoids = NearbyBoids(boidList);
 
 	// NOTE these functions should always return a normalised vector
-	XMFLOAT3  vSeparation = CalculateSeparationVector(&nearBoids); // vector away from nearest boid
+	XMFLOAT3  vSeparation = CalculateSeparationVector(&nearBoids); // vector away from nearby boids
 	XMFLOAT3  vAlignment = CalculateAlignmentVector(&nearBoids); // average direction of nearby boids
 	XMFLOAT3  vCohesion = CalculateCohesionVector(&nearBoids); // vector towards average position of nearby boids
 	XMFLOAT3  vFlee = CalculateFleeVector(predatorList); // vector away from nearby predators
@@ -121,9 +121,10 @@ XMFLOAT3 Boid::CalculateSeparationVector(vecBoid* boidList)
 	{
 		nearby = DivideFloat3(nearby, count);
 		nearby = NormaliseFloat3(nearby);
+		return nearby;
 	}
 
-	return nearby;
+	return m_direction;
 }
 
 XMFLOAT3 Boid::CalculateAlignmentVector(vecBoid* boidList)
@@ -136,9 +137,13 @@ XMFLOAT3 Boid::CalculateAlignmentVector(vecBoid* boidList)
 	{
 		nearby = AddFloat3(*b->GetDirection(), nearby);
 	}
-	nearby = DivideFloat3(nearby, boidList->size());
+	if (boidList->size() > 0)
+	{
+		nearby = DivideFloat3(nearby, boidList->size());
 
-	return NormaliseFloat3(nearby); // return the normalised (average) direction of nearby drawables
+		return NormaliseFloat3(nearby); // return the normalised (average) direction of nearby drawables
+	}
+	return m_direction;
 }
 
 XMFLOAT3 Boid::CalculateCohesionVector(vecBoid* boidList)
@@ -153,11 +158,15 @@ XMFLOAT3 Boid::CalculateCohesionVector(vecBoid* boidList)
 	{
 		nearby = AddFloat3(*boid->getPosition(), nearby);
 	}
-	nearby = DivideFloat3(nearby, boidList->size()); // this is the avg position
+	if (boidList->size() > 0)
+	{
+		nearby = DivideFloat3(nearby, boidList->size()); // this is the avg position
 
-	nearby = SubtractFloat3(nearby, m_position); // this gets the direction to the avg position
+		nearby = SubtractFloat3(nearby, m_position); // this gets the direction to the avg position
 
-	return NormaliseFloat3(nearby); // nearby is the direction to where the other drawables are
+		return NormaliseFloat3(nearby); // nearby is the direction to where the other drawables are
+	}
+	return m_direction;
 }
 
 XMFLOAT3 Boid::VecToNearbyBoids(vecBoid* boidList)
@@ -201,8 +210,8 @@ XMFLOAT3 Boid::VecToNearbyBoids(vecBoid* boidList)
 		return NormaliseFloat3(directionNearest);
 	}
 
-	// if there is not a nearby fish return 0
-	return XMFLOAT3(0, 0, 0);
+	// if there is not a nearby fish return current direction
+	return m_direction;
 }
 
 XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
@@ -219,31 +228,27 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 		XMFLOAT3 vDiff = SubtractFloat3(m_position, vP);
 		
 		float l = MagnitudeFloat3(vDiff);
-		if (l < killDistance)
-		{
-			if(canDie)
-				isAlive = false;
-		}
-		else
+		if (l > killDistance)
 		{
 			spotPredator = false;
 			if (l < fleeDistance)
 			{
-				if (CompareAngle(m_direction, vDiff, FOV))
+				XMFLOAT3 toPredator = SubtractFloat3(vP, m_position);
+				if (CompareAngle(m_direction, toPredator, FOV))
 				{
 					spotPredator = true;
-					scared = true;
+					//scared = true;
 				}
 			}
-			if (spotPredator)
+			/*if (spotPredator)
 			{
 				_timer->Stop();
 				_timer->SetFunc([&]() {scared = false;});
-				_timer->SetLength(0.5f);
+				_timer->SetLength(0.01f);
 				_timer->Start();
-			}
+			}*/
 
-			if (scared)
+			if (spotPredator)
 			{
 				speed = SPEED_SCARED;
 				dir = AddFloat3(dir, vDiff);
@@ -252,25 +257,19 @@ XMFLOAT3 Boid::CalculateFleeVector(vector<Predator*> predatorList)
 			{
 				speed = SPEED_DEFAULT;
 			}
-
-			//if (l < fleeDistance) // if spotted and in flee distance, become scared and do not return to normal until outside of fleedistance
-			//{
-			//	if (spotted)
-			//	{
-			//		scared = true;
-
-			//		if (speed != SPEED_SCARED)
-			//			Debug::Print("BRUH");
-			//	}
-			//}
-			//else
-			//{
-			//	scared = false;
-			//}
+		}
+		else
+		{
+			if (canDie)
+				isAlive = false;
+			else
+				dir = AddFloat3(dir, vDiff);
 		}
 	}
-
-	return dir;
+	if(MagnitudeFloat3(dir) > 0)
+		return dir;
+	
+	return m_direction;
 }
 
 bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
@@ -282,8 +281,8 @@ bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
 	float n2 = 270 - atan2(pos2.y, pos2.x) * 180 / XM_PI;
 	float angle2 = fmod(n2, 360);
 
-	float lower = angle1 - range;
-	float upper = angle1 + range;
+	float lower = angle1 - (range * 0.5f);
+	float upper = angle1 + (range * 0.5f);
 
 	// if upper and lower go past 0 or 360 loop around and then 
 	if (lower < 0.0f)
@@ -296,9 +295,10 @@ bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
 	}
 
 	// check if angle in range
+	bool inRange = false;
 	if (lower <= angle2 && angle2 <= upper)
 	{
-		return true;
+		inRange = true;
 	}
 	else if (upper - lower <= 0.0f)
 	{
@@ -306,13 +306,21 @@ bool Boid::CompareAngle(XMFLOAT3 pos1, XMFLOAT3 pos2, float range)
 		if (lower <= angle2 && angle2 <= 360.0f)
 		{
 			// angle between lower and 360
-			return true;
+			inRange = true;
 		}
 		else if (0.0f <= angle2 && angle2 <= upper)
 		{
 			// angle between 0 and upper
-			return true;
+			inRange = true;
 		}
+	}
+
+	if (inRange)
+	{
+		/*Debug::Print("Lower: " + to_string(lower));
+		Debug::Print("Upper: " + to_string(upper));
+		Debug::Print("Angle: " + to_string(angle2));*/
+		return true;
 	}
 
 	/*Debug::Print("Lower: " + to_string(lower));
