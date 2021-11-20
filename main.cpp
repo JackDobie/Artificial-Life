@@ -164,7 +164,7 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
     wcex.hCursor = LoadCursor( nullptr, IDC_ARROW );
     wcex.hbrBackground = ( HBRUSH )( COLOR_WINDOW + 1 );
     wcex.lpszMenuName = nullptr;
-    wcex.lpszClassName = L"TutorialWindowClass";
+    wcex.lpszClassName = L"WindowClass";
     wcex.hIconSm = LoadIcon( wcex.hInstance, ( LPCTSTR )IDI_TUTORIAL1 );
     if( !RegisterClassEx( &wcex ) )
         return E_FAIL;
@@ -179,7 +179,7 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
 	g_viewHeight = height;
 
     AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
-    g_hWnd = CreateWindow( L"TutorialWindowClass", L"Direct3D 11 Tutorial 5",
+    g_hWnd = CreateWindow( L"WindowClass", L"Boids",
                            WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
                            CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
                            nullptr );
